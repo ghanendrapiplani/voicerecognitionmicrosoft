@@ -8,24 +8,45 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
-
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
+import android.app.AlertDialog;
+import android.content.Context;
+import android.content.DialogInterface;
+import android.content.Intent;
+import android.os.Build;
 
 public class MainActivity extends Activity {
-    static DatabaseReference dbr ;
-    Button addnewprofile,identifysamples;
+     Button addnewprofile,identifysamples,button3;
+    UserProfilesId uid;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        dbr = FirebaseDatabase.getInstance().getReference().child("voicerecog");
-        addnewprofile = (Button) findViewById(R.id.addnewprofile);
+         addnewprofile = (Button) findViewById(R.id.addnewprofile);
         identifysamples = (Button) findViewById(R.id.identifysamples);
+        button3 = (Button) findViewById(R.id.button3);
+        uid=new UserProfilesId(this);
+        button3.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                final AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+                builder.setMessage("Are you sure you want to delete all data?")
+                        .setCancelable(false)
+                        .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                            public void onClick(@SuppressWarnings("unused") final DialogInterface dialog, @SuppressWarnings("unused") final int id) {
+                                uid.clearOldSetting();
+                            }
+                        })
+                        .setNegativeButton("No", new DialogInterface.OnClickListener() {
+                            public void onClick(final DialogInterface dialog, @SuppressWarnings("unused") final int id) {
+                                dialog.cancel();
+                            }
+                        });
+                final AlertDialog alert = builder.create();
+                alert.show();
+
+            }
+        });
 
         addnewprofile.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -33,6 +54,7 @@ public class MainActivity extends Activity {
                 startActivity(new Intent(MainActivity.this,NewProfileListActivity.class));
             }
         });
+
         identifysamples.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -47,38 +69,7 @@ public class MainActivity extends Activity {
     @Override
     protected void onResume() {
         super.onResume();
-         checkFirebase(dbr,MainActivity.this);
     }
-
-    public boolean checkFirebase(DatabaseReference db,final Context cont){
-        Boolean b = false;
-        if (SplashActivity.isOnline(this)) {
-            db.addListenerForSingleValueEvent(new ValueEventListener() {
-                @Override
-                public void onDataChange(DataSnapshot dataSnapshot) {
-                    try{
-                        String a = dataSnapshot.getValue().toString();
-                        System.out.println("datasnap val="+a);
-                    }catch (NullPointerException e){
-                        Toast.makeText(MainActivity.this, "Server error, please contact admin.", Toast.LENGTH_SHORT).show();
-                        startActivity(new Intent(cont,SplashActivity.class));
-                        finish();
-                    }
-
-                }
-
-                @Override
-                public void onCancelled(DatabaseError databaseError) {
-
-                }
-            });
-        }
-        else{
-            Toast.makeText(cont, "Please make sure you are connected to the internet and try again.", Toast.LENGTH_SHORT).show();
-        }
-        return b;
-    }
-
 
     @Override
     public void onBackPressed() {

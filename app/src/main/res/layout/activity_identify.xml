@@ -49,6 +49,22 @@
         android:layout_alignParentBottom="true"
         android:layout_alignStart="@+id/btn1" />
 
+    <Button
+        android:id="@+id/btnrec"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="21dp"
+        android:background="@color/colorPrimary"
+        android:onClick="recAudio"
+        android:padding="10dp"
+        android:text="Record Audio File"
+        android:textColor="@color/colorWhite"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        android:layout_centerVertical="true"
+        android:layout_centerHorizontal="true" />
+
+
     <TextView
         android:id="@+id/tvres"
         android:padding="10dp"

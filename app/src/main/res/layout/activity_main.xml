@@ -65,7 +65,7 @@
         android:background="@color/colorPrimaryDark"
         android:onClick="toLearnAbout"
         android:padding="10dp"
-        android:text="Learn How to use app"
+        android:text="Clear Data"
         android:textColor="@color/colorWhite"
         android:textSize="18sp"
         android:textStyle="bold"

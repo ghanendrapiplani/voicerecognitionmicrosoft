@@ -20,31 +20,30 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
 
 import java.io.File;
+import java.io.IOException;
+
+import cafe.adriel.androidaudiorecorder.AndroidAudioRecorder;
+import cafe.adriel.androidaudiorecorder.model.AudioChannel;
+import cafe.adriel.androidaudiorecorder.model.AudioSampleRate;
+import cafe.adriel.androidaudiorecorder.model.AudioSource;
 
 /**
  * Created by ghanendra on 29/07/2017.
  */
 
 public class IdentifyActivity extends Activity {
-    static DatabaseReference dbr;
     static int PICK_AUDIO = 123;
     UserProfilesId uprofid;
     UserProfilesNames unames;
     TextView tvresult;
-    Button clicktopick;
+    Button clicktopick,btnrec;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_identify);
-        dbr = FirebaseDatabase.getInstance().getReference().child("voicerecog");
         uprofid = new UserProfilesId(this);
         unames = new UserProfilesNames(this);
         tvresult = (TextView) findViewById(R.id.tvres);
@@ -77,41 +76,40 @@ public class IdentifyActivity extends Activity {
                 }
             }
         });
+        btnrec = (Button) findViewById(R.id.btnrec);
+
+        btnrec.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                String filePath = Environment.getExternalStorageDirectory()+"/sample.wav";
+                File f = new File(filePath);
+                try {
+                    f.createNewFile();
+                    int color = getResources().getColor(R.color.colorPrimaryDark);
+                    int requestCode = 0;
+                    AndroidAudioRecorder.with(IdentifyActivity.this)
+                            .setFilePath(filePath)
+                            .setColor(color)
+                            .setRequestCode(requestCode)
+                            .setSource(AudioSource.MIC)
+                            .setChannel(AudioChannel.MONO)
+                            .setSampleRate(AudioSampleRate.HZ_16000)
+                            .setAutoStart(true)
+                            .setKeepDisplayOn(true)
+                            .record();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        checkFirebase(dbr, IdentifyActivity.this);
-    }
+     }
 
-    public boolean checkFirebase(DatabaseReference db, final Context cont) {
-        Boolean b = false;
-        if (SplashActivity.isOnline(this)) {
-            db.addListenerForSingleValueEvent(new ValueEventListener() {
-                @Override
-                public void onDataChange(DataSnapshot dataSnapshot) {
-                    try {
-                        String a = dataSnapshot.getValue().toString();
-                        System.out.println("datasnap val=" + a);
-                    } catch (NullPointerException e) {
-                        Toast.makeText(cont, "Server error, please contact admin.", Toast.LENGTH_SHORT).show();
-                        startActivity(new Intent(cont, SplashActivity.class));
-                        finish();
-                    }
-
-                }
-
-                @Override
-                public void onCancelled(DatabaseError databaseError) {
-
-                }
-            });
-        } else {
-            Toast.makeText(cont, "Please make sure you are connected to the internet and try again.", Toast.LENGTH_SHORT).show();
-        }
-        return b;
-    }
 
 
     public void pickAudio() {
@@ -148,6 +146,14 @@ public class IdentifyActivity extends Activity {
                 Toast.makeText(this, "Something went wrong, click button to pick audio again.", Toast.LENGTH_SHORT).show();
             }
         }
+        if (requestCode == 0) {
+            if (resultCode == RESULT_OK) {
+                Toast.makeText(this, "Audio File Saved successfully, sample.wav", Toast.LENGTH_SHORT).show();
+            } else if (resultCode == RESULT_CANCELED) {
+                Toast.makeText(this, "Audio File Save failed. Please try again", Toast.LENGTH_SHORT).show();
+            }
+        }
+
         super.onActivityResult(requestCode, resultCode, data);
     }
 

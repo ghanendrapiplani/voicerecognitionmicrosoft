@@ -35,6 +35,7 @@
     </android.support.design.widget.AppBarLayout>
 
 
+
     <TextView
         android:id="@+id/username"
         android:layout_width="wrap_content"
@@ -63,6 +64,22 @@
         android:textColor="@color/colorPrimary" />
 
     <Button
+        android:id="@+id/btnrec"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="21dp"
+        android:background="@color/colorPrimary"
+        android:onClick="recAudio"
+        android:padding="10dp"
+        android:text="Record Audio File"
+        android:textColor="@color/colorWhite"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        android:layout_below="@+id/editusername"
+        android:layout_centerHorizontal="true" />
+
+
+    <Button
         android:id="@+id/btn1"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -74,7 +91,7 @@
         android:textColor="@color/colorWhite"
         android:textSize="18sp"
         android:textStyle="bold"
-        android:layout_below="@+id/username"
+        android:layout_below="@+id/btnrec"
         android:layout_centerHorizontal="true" />
 
     <Button
@@ -87,7 +104,8 @@
         android:textColor="@color/colorWhite"
         android:textSize="18sp"
         android:textStyle="bold"
-        android:layout_centerVertical="true"
+        android:layout_below="@+id/btn1"
+        android:layout_marginTop="20dp"
         android:layout_alignStart="@+id/btn1" />
 
 

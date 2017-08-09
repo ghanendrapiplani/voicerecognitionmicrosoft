@@ -20,32 +20,31 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
 
 import java.io.File;
+import java.io.IOException;
+
+import cafe.adriel.androidaudiorecorder.AndroidAudioRecorder;
+import cafe.adriel.androidaudiorecorder.model.AudioChannel;
+import cafe.adriel.androidaudiorecorder.model.AudioSampleRate;
+import cafe.adriel.androidaudiorecorder.model.AudioSource;
 
 /**
  * Created by ghanendra on 29/07/2017.
  */
 
 public class NewProfileAddActivity extends Activity {
-    static DatabaseReference dbr;
     static int PICK_AUDIO = 123;
     UserProfilesId uprofid;
     UserProfilesNames unames;
     EditText editusername;
-    Button clicktocont, btn1;
+    Button clicktocont, btn1, btnrec;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_add_newprofile);
-        dbr = FirebaseDatabase.getInstance().getReference().child("voicerecog");
-        uprofid = new UserProfilesId(this);
+         uprofid = new UserProfilesId(this);
         unames = new UserProfilesNames(this);
         editusername = (EditText) findViewById(R.id.editusername);
         clicktocont = (Button) findViewById(R.id.clicktocont);
@@ -63,41 +62,45 @@ public class NewProfileAddActivity extends Activity {
                 finish();
             }
         });
+        btnrec = (Button) findViewById(R.id.btnrec);
+
+        btnrec.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (!editusername.getText().toString().trim().matches("")) {
+                    String filePath = Environment.getExternalStorageDirectory()+"/"+editusername.getText().toString()+".wav";
+                    File f = new File(filePath);
+                    try {
+                        f.createNewFile();
+                        int color = getResources().getColor(R.color.colorPrimaryDark);
+                        int requestCode = 0;
+                        AndroidAudioRecorder.with(NewProfileAddActivity.this)
+                                .setFilePath(filePath)
+                                .setColor(color)
+                                .setRequestCode(requestCode)
+                                .setSource(AudioSource.MIC)
+                                .setChannel(AudioChannel.MONO)
+                                .setSampleRate(AudioSampleRate.HZ_16000)
+                                .setAutoStart(true)
+                                .setKeepDisplayOn(true)
+                                .record();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+
+                }
+                else
+                    Toast.makeText(NewProfileAddActivity.this, "Please fill a username to continue.", Toast.LENGTH_SHORT).show();
+            }
+        });
+
+
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        checkFirebase(dbr, NewProfileAddActivity.this);
-    }
-
-    public boolean checkFirebase(DatabaseReference db, final Context cont) {
-        Boolean b = false;
-        if (SplashActivity.isOnline(this)) {
-            db.addListenerForSingleValueEvent(new ValueEventListener() {
-                @Override
-                public void onDataChange(DataSnapshot dataSnapshot) {
-                    try {
-                        String a = dataSnapshot.getValue().toString();
-                        System.out.println("datasnap val=" + a);
-                    } catch (NullPointerException e) {
-                        Toast.makeText(cont, "Server error, please contact admin.", Toast.LENGTH_SHORT).show();
-                        startActivity(new Intent(cont, SplashActivity.class));
-                        finish();
-                    }
-
-                }
-
-                @Override
-                public void onCancelled(DatabaseError databaseError) {
-
-                }
-            });
-        } else {
-            Toast.makeText(cont, "Please make sure you are connected to the internet and try again.", Toast.LENGTH_SHORT).show();
-        }
-        return b;
-    }
+     }
 
 
     public void pickAudio() {
@@ -137,6 +140,13 @@ public class NewProfileAddActivity extends Activity {
                 Toast.makeText(this, "Something went wrong, click button to pick audio again.", Toast.LENGTH_SHORT).show();
             }
         }
+        if (requestCode == 0) {
+            if (resultCode == RESULT_OK) {
+                Toast.makeText(this, "Audio File Saved successfully.", Toast.LENGTH_SHORT).show();
+            } else if (resultCode == RESULT_CANCELED) {
+                Toast.makeText(this, "Audio File Save failed. Please try again", Toast.LENGTH_SHORT).show();
+            }
+        }
         super.onActivityResult(requestCode, resultCode, data);
     }
 
@@ -148,14 +158,6 @@ public class NewProfileAddActivity extends Activity {
             }
         });
         VolleyHelper.getType(this, path, filename, editusername.getText().toString(), uprofid, unames);
-    }
-
-    public static void showRegistering() {
-
-    }
-
-    public static void showDone() {
-
     }
 
     public String getFileName(Uri uri) {
@@ -267,27 +269,17 @@ public class NewProfileAddActivity extends Activity {
     }
 
 
-    /**
-     * @param uri The Uri to check.
-     * @return Whether the Uri authority is ExternalStorageProvider.
-     */
     public static boolean isExternalStorageDocument(Uri uri) {
         return "com.android.externalstorage.documents".equals(uri.getAuthority());
     }
 
-    /**
-     * @param uri The Uri to check.
-     * @return Whether the Uri authority is DownloadsProvider.
-     */
     public static boolean isDownloadsDocument(Uri uri) {
         return "com.android.providers.downloads.documents".equals(uri.getAuthority());
     }
 
-    /**
-     * @param uri The Uri to check.
-     * @return Whether the Uri authority is MediaProvider.
-     */
     public static boolean isMediaDocument(Uri uri) {
         return "com.android.providers.media.documents".equals(uri.getAuthority());
     }
+
+
 }

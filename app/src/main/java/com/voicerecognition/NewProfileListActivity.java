@@ -11,11 +11,6 @@ import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.widget.Toast;
 
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
 
@@ -24,8 +19,7 @@ import java.util.ArrayList;
  */
 
 public class NewProfileListActivity extends Activity {
-    static DatabaseReference dbr ;
-    UserProfilesId uids;
+     UserProfilesId uids;
     ArrayList<NewProfileModel> arr;
     ArrayList<String> arr2;
     FloatingActionButton fab;
@@ -36,8 +30,7 @@ public class NewProfileListActivity extends Activity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_list_newprofile);
-        dbr = FirebaseDatabase.getInstance().getReference().child("voicerecog");
-        uids=new UserProfilesId(this);
+         uids=new UserProfilesId(this);
         arr= new ArrayList<>();
         arr2= new ArrayList<>();
         System.out.println("arr size oncreate"+arr.size());
@@ -64,8 +57,7 @@ public class NewProfileListActivity extends Activity {
     @Override
     protected void onResume() {
         super.onResume();
-        checkFirebase(dbr,NewProfileListActivity.this);
-        manageArrs();
+         manageArrs();
         madapter.notifyDataSetChanged();
         System.out.println("arraylist newprofilelistactivity onresume "+arr.size());
     }
@@ -79,35 +71,6 @@ public class NewProfileListActivity extends Activity {
                 arr.add(n);
             }
         }
-    }
-
-    public boolean checkFirebase(DatabaseReference db,final Context cont){
-        Boolean b = false;
-        if (SplashActivity.isOnline(this)) {
-            db.addListenerForSingleValueEvent(new ValueEventListener() {
-                @Override
-                public void onDataChange(DataSnapshot dataSnapshot) {
-                    try{
-                        String a = dataSnapshot.getValue().toString();
-                        System.out.println("datasnap val="+a);
-                    }catch (NullPointerException e){
-                        Toast.makeText(cont, "Server error, please contact admin.", Toast.LENGTH_SHORT).show();
-                        startActivity(new Intent(cont,SplashActivity.class));
-                        finish();
-                    }
-
-                }
-
-                @Override
-                public void onCancelled(DatabaseError databaseError) {
-
-                }
-            });
-        }
-        else{
-            Toast.makeText(cont, "Please make sure you are connected to the internet and try again.", Toast.LENGTH_SHORT).show();
-        }
-        return b;
     }
 
     public void registerNewUser(View view){
