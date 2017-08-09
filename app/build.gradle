@@ -39,4 +39,3 @@ dependencies {
     compile project(':commons-cli-1.2')
     compile project(':httpcore-4.4.6')
 }
-

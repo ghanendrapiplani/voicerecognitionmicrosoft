@@ -17,6 +17,7 @@ import android.os.Build;
 public class MainActivity extends Activity {
      Button addnewprofile,identifysamples,button3;
     UserProfilesId uid;
+  
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
